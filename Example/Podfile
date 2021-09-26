@@ -1,0 +1,13 @@
+use_frameworks!
+
+platform :ios, '9.0'
+
+target 'ZLAutoLayout_Example' do
+  pod 'ZLAutoLayout', :path => '../'
+
+  target 'ZLAutoLayout_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
