@@ -11,6 +11,12 @@
 
 - (ZLConstraint * (^)(id item))equalTo;
 
+- (ZLConstraint * (^)(id item))greaterThanOrEqualTo;
+
+- (ZLConstraint * (^)(id item))lessThanOrEqualTo;
+
+- (ZLConstraint * (^)(UILayoutPriority priority))priority;
+
 - (ZLConstraint * (^)(CGFloat m))multiplier;
 
 - (ZLConstraint * (^)(CGFloat c))constant;

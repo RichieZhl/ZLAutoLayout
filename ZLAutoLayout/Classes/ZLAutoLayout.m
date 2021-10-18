@@ -16,6 +16,7 @@
     NSLayoutRelation relation;
     CGFloat multiplier;
     CGFloat constant;
+    UILayoutPriority priority;
     BOOL safeAreaAttribute;
     
     UIView *installedView;
@@ -36,6 +37,7 @@
         attribute2 = NSLayoutAttributeNotAnAttribute;
         multiplier = 1.0;
         constant = 0;
+        priority = UILayoutPriorityRequired;
         safeAreaAttribute = NO;
         layoutConstraint = nil;
     }
@@ -57,6 +59,49 @@
             return self;
         }
         self->relation = NSLayoutRelationEqual;
+        return self;
+    };
+}
+
+- (ZLConstraint * (^)(id item))greaterThanOrEqualTo {
+    return ^(id item) {
+        if ([item isKindOfClass:[ZLConstraint class]]) {
+            ZLConstraint *c = (ZLConstraint *)item;
+            self->item2 = c->item1;
+            self->attribute2 = c->attribute1;
+        } else if ([item isKindOfClass:[UIView class]]) {
+            self->item2 = (UIView *)item;
+        } else if ([item isKindOfClass:[NSNumber class]]) {
+            self->constant = [(NSNumber *)item doubleValue];
+        } else {
+            return self;
+        }
+        self->relation = NSLayoutRelationGreaterThanOrEqual;
+        return self;
+    };
+}
+
+- (ZLConstraint * (^)(id item))lessThanOrEqualTo {
+    return ^(id item) {
+        if ([item isKindOfClass:[ZLConstraint class]]) {
+            ZLConstraint *c = (ZLConstraint *)item;
+            self->item2 = c->item1;
+            self->attribute2 = c->attribute1;
+        } else if ([item isKindOfClass:[UIView class]]) {
+            self->item2 = (UIView *)item;
+        } else if ([item isKindOfClass:[NSNumber class]]) {
+            self->constant = [(NSNumber *)item doubleValue];
+        } else {
+            return self;
+        }
+        self->relation = NSLayoutRelationLessThanOrEqual;
+        return self;
+    };
+}
+
+- (ZLConstraint * (^)(UILayoutPriority priority))priority {
+    return ^(UILayoutPriority priority) {
+        self->priority = priority;
         return self;
     };
 }
@@ -130,6 +175,7 @@ if (self->attribute1 == attr) { \
         constraint = [NSLayoutConstraint constraintWithItem:self->item1  attribute:attr relatedBy:self->relation toItem:self->item2 attribute:self->attribute2  multiplier:self->multiplier constant:self->constant]; \
     } \
       \
+    constraint.priority = self->priority; \
     [constraint setActive:YES]; \
     self->layoutConstraint = constraint; \
     UIView *superView = [self closestCommonSuperview:self->item1 view2:self->item2]; \
@@ -143,6 +189,7 @@ if (self->attribute1 == attr) { \
         self->attribute2 = attr; \
     } \
     constraint = [NSLayoutConstraint constraintWithItem:self->item1 attribute:attr relatedBy:self->relation toItem:self->item2 attribute:self->attribute2 multiplier:self->multiplier constant:self->constant]; \
+    constraint.priority = self->priority; \
     [constraint setActive:YES]; \
     self->layoutConstraint = constraint; \
     self->installedView = self->item1.superview; \
