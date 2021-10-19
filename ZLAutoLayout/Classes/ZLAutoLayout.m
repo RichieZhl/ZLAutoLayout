@@ -53,6 +53,7 @@
             self->attribute2 = c->attribute1;
         } else if ([item isKindOfClass:[UIView class]]) {
             self->item2 = (UIView *)item;
+            self->attribute2 = self->attribute1;
         } else if ([item isKindOfClass:[NSNumber class]]) {
             self->constant = [(NSNumber *)item doubleValue];
         } else {
@@ -71,6 +72,7 @@
             self->attribute2 = c->attribute1;
         } else if ([item isKindOfClass:[UIView class]]) {
             self->item2 = (UIView *)item;
+            self->attribute2 = self->attribute1;
         } else if ([item isKindOfClass:[NSNumber class]]) {
             self->constant = [(NSNumber *)item doubleValue];
         } else {
@@ -89,6 +91,7 @@
             self->attribute2 = c->attribute1;
         } else if ([item isKindOfClass:[UIView class]]) {
             self->item2 = (UIView *)item;
+            self->attribute2 = self->attribute1;
         } else if ([item isKindOfClass:[NSNumber class]]) {
             self->constant = [(NSNumber *)item doubleValue];
         } else {
@@ -131,13 +134,12 @@
 }
 
 #pragma mark - heirachy
-
 - (UIView *)closestCommonSuperview:(UIView *)view1 view2:(UIView *)view2 {
     UIView *closestCommonSuperview = nil;
 
-    UIView *secondViewSuperview = view2.superview;
+    UIView *secondViewSuperview = view2;
     while (!closestCommonSuperview && secondViewSuperview) {
-        UIView *firstViewSuperview = view1.superview;
+        UIView *firstViewSuperview = view1;
         while (!closestCommonSuperview && firstViewSuperview) {
             if (secondViewSuperview == firstViewSuperview) {
                 closestCommonSuperview = secondViewSuperview;
@@ -155,7 +157,6 @@
             [self->layoutConstraint setActive:YES];
             return self;
         }
-        self->item1.translatesAutoresizingMaskIntoConstraints = NO;
         
         NSLayoutConstraint *constraint = nil;
         
@@ -176,7 +177,6 @@ if (self->attribute1 == attr) { \
     } \
       \
     constraint.priority = self->priority; \
-    [constraint setActive:YES]; \
     self->layoutConstraint = constraint; \
     UIView *superView = [self closestCommonSuperview:self->item1 view2:self->item2]; \
     self->installedView = superView; \
@@ -190,7 +190,6 @@ if (self->attribute1 == attr) { \
     } \
     constraint = [NSLayoutConstraint constraintWithItem:self->item1 attribute:attr relatedBy:self->relation toItem:self->item2 attribute:self->attribute2 multiplier:self->multiplier constant:self->constant]; \
     constraint.priority = self->priority; \
-    [constraint setActive:YES]; \
     self->layoutConstraint = constraint; \
     self->installedView = self->item1.superview; \
     [self->item1.superview addConstraint:constraint]; \
@@ -339,6 +338,8 @@ if (self->attribute1 == attr) { \
 
 static void *ZLAutoLayoutAssociatedKey = &ZLAutoLayoutAssociatedKey;
 
+static void *ZLAutoLayoutInstalledAssociatedKey = &ZLAutoLayoutInstalledAssociatedKey;
+
 @implementation UIView (ZLAutoLayout)
 
 - (ZLAutoLayout *)zla {
@@ -346,6 +347,7 @@ static void *ZLAutoLayoutAssociatedKey = &ZLAutoLayoutAssociatedKey;
     if (al == nil) {
         al = [[ZLAutoLayout alloc] initWithView:self];
         objc_setAssociatedObject(self, ZLAutoLayoutAssociatedKey, al, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        self.translatesAutoresizingMaskIntoConstraints = NO;
     }
     return al;
 }
