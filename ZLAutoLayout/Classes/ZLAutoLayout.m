@@ -135,6 +135,11 @@
 
 #pragma mark - heirachy
 - (UIView *)closestCommonSuperview:(UIView *)view1 view2:(UIView *)view2 {
+    if (view2 == nil) {
+        return view1.superview;
+    } else if (view1.superview == view2) {
+        return view2;
+    }
     UIView *closestCommonSuperview = nil;
 
     UIView *secondViewSuperview = view2;
@@ -148,7 +153,7 @@
         }
         secondViewSuperview = secondViewSuperview.superview;
     }
-    return closestCommonSuperview == nil ? view1.superview : closestCommonSuperview;
+    return closestCommonSuperview;
 }
 
 - (ZLConstraint * (^)(void))install {
@@ -191,8 +196,9 @@ if (self->attribute1 == attr) { \
     constraint = [NSLayoutConstraint constraintWithItem:self->item1 attribute:attr relatedBy:self->relation toItem:self->item2 attribute:self->attribute2 multiplier:self->multiplier constant:self->constant]; \
     constraint.priority = self->priority; \
     self->layoutConstraint = constraint; \
-    self->installedView = self->item1.superview; \
-    [self->item1.superview addConstraint:constraint]; \
+    UIView *superView = [self closestCommonSuperview:self->item1 view2:self->item2]; \
+    self->installedView = superView; \
+    [superView addConstraint:constraint]; \
 }
         
         NormalAttr(NSLayoutAttributeLeft)
